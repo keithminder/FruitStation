@@ -1,0 +1,108 @@
+﻿@model IEnumerable<FruitStation.Domain.Entities.Sale>
+@{
+    ViewBag.Title = "Sales Report";
+}
+<hgroup class="title">
+    <h1>@ViewBag.Title.</h1>
+    <h2>@ViewBag.Message</h2>
+</hgroup>
+<div>
+    <form action="/Home/Reports" method="post">
+        <label for="startDate">Start Date</label>
+
+        <input type="date" required name="startDate" />
+
+        <label for="endDate">End Date</label>
+
+        <input type="date" required name="endDate" />
+
+        <input type="submit" value="View Sales" />
+    </form>
+@if (Model != null)
+{
+    <h3>Sales Summary</h3>
+    <span>@ViewBag.StartDate - @ViewBag.EndDate</span>
+    <table>
+
+        <tr>
+            <td>Fruit</td>
+            <td>Quantity</td>
+            <td>Total Sales</td>
+        </tr>
+
+
+
+        @foreach (var fruitSales in Model.GroupBy(s => s.Fruit.Name))
+        {
+            <tr>
+                <td>@fruitSales.Key</td>
+                <td align="right">@fruitSales.Sum(fs => fs.Quantity)</td>
+                <td align="right">@fruitSales.Sum(fs => fs.ExtendedPrice).ToString("c")</td>
+            </tr>
+        }
+        <tr class="sum">
+            <td colspan="2" align="right">@Model.Sum(sd => sd.Quantity)</td>
+            <td align="right">@Model.Sum(sd => sd.ExtendedPrice).ToString("c")</td>
+        </tr>
+    </table>
+    <div id="canvas-holder">
+        <canvas id="chart-area" width="300" height="300" />
+    </div>
+        foreach (var fruitSales in Model.GroupBy(s => s.Fruit.Name))
+    {
+    <div id="@fruitSales.Key" class="salesDetails">
+        <h3>Sales Entries for @(fruitSales.Key)s</h3>
+        <table>
+
+            <tr>
+                <td>Quantity</td>
+                <td>Unit Price</td>
+                <td>Entered On</td>
+            </tr>
+            @foreach (var sale in fruitSales)
+            {
+                <tr>
+                    <td>@sale.Quantity</td>
+                    <td>@sale.UnitPrice.ToString("c")</td>
+                    <td>@sale.EnteredOn</td>
+                </tr>
+            }
+
+        </table>
+    </div>
+    }
+
+        <script src="~/Scripts/Chart.min.js"></script>
+<script>
+    Chart.defaults.global.animation = false;
+    @{var i= 0;}
+    var colors =["red","yellow","orange","green","pink"];
+    var pieData = [
+        @foreach (var fruitSales in Model.GroupBy(s=>s.Fruit.Name))
+	{
+            <text>
+     {
+         value: @fruitSales.Sum(s=>s.Quantity),
+         color:colors[@i],
+         highlight: "#FF5A5E",
+         label: "@fruitSales.Key"
+     },</text>
+        i++;
+     }
+    ];
+    window.onload = function(){
+        var ctx = document.getElementById("chart-area").getContext("2d");
+        var chart = new Chart(ctx).Pie(pieData);
+        $(".salesDetails").hide();
+        $("#chart-area").click(
+  function(evt){
+      var activePoints = chart.getSegmentsAtEvent(evt);
+      $('.salesDetails').hide();
+      $("#"+activePoints[0].label).show();
+      alert(url);
+  } );
+    };
+
+
+</script>
+}

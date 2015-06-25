@@ -1,0 +1,94 @@
+﻿@model FruitStation.Web.Models.SaleEntryModel
+@{
+    ViewBag.Title = "Fruit Stand";
+}
+@section featured {
+    <section class="featured">
+        <div class="content-wrapper">
+            <hgroup class="title">
+                <h1>@ViewBag.Title.</h1>
+                <h2>@ViewBag.Message</h2>
+            </hgroup>
+            <p>
+                Select a fruit, enter a quantity and a unit price below:
+            </p>
+        </div>
+    </section>
+}
+<h3>Enter Sales:</h3>
+<div>
+    <form action="/" method="post" id="salesForm">
+        <label for="fruit.id">Fruit</label>
+        <select name="fruit.id" id="fruit.id" required>
+            <option value="">Select Fruit</option>
+            @foreach (var fruit in Model.Fruits)
+            {
+                <option value="@fruit.ID">@fruit.Name</option>
+            }
+        </select>
+        <label for="quantity">Quantity</label>
+
+        <input type="number" required name="quantity" id="quantity" />
+
+        <label for="unitPrice">Unit Price</label>
+
+        <input type="number" required name="unitPrice" id="unitPrice" step="any" min="0" />
+
+        <input type="submit" value="Enter Sale" />
+    </form>
+    <h3>Today's Sales Summary</h3>
+
+    <table>
+
+        <tr>
+            <td>Fruit</td>
+            <td>Quantity</td>
+            <td>Total Sales</td>
+        </tr>
+        @foreach (var salesDate in Model.Sales.GroupBy(s => s.EnteredOn.Date))
+        {
+            <tr>
+                <td colspan="3">@salesDate.Key.ToShortDateString()</td>
+            </tr>
+            foreach (var salesForFruit in salesDate.GroupBy(sd => sd.Fruit.Name))
+            {
+                <tr>
+                    <td>@salesForFruit.Key</td>
+                    <td align="right">@salesForFruit.Sum(sf => sf.Quantity)</td>
+                    <td align="right">@salesForFruit.Sum(sf => sf.ExtendedPrice).ToString("c")</td>
+                </tr>
+            }
+            <tr class="sum">
+                <td colspan="2" align="right">@salesDate.Sum(sd => sd.Quantity)</td>
+                <td align="right">@salesDate.Sum(sd => sd.ExtendedPrice).ToString("c")</td>
+            </tr>
+        }
+
+    </table>
+    <h3>Today's Sales Entries</h3>
+    <table>
+
+        <tr>
+            <td>Quantity</td>
+            <td>Fruit</td>
+            <td>Unit Price</td>
+            <td>Entered On</td>
+        </tr>
+        @foreach (var sale in Model.Sales)
+        {
+            <tr>
+                <td>@sale.Quantity</td>
+                <td>@sale.Fruit.Name</td>
+                <td align="right">@sale.UnitPrice.ToString("c")</td>
+                <td>@sale.EnteredOn</td>
+            </tr>
+        }
+
+    </table>
+</div>
+
+<script>
+    $(function () {
+        $("#salesForm").validate();
+    });
+</script>
