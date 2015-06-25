@@ -51,7 +51,7 @@ namespace FruitStation.Web.Controllers
 
         public ActionResult Reports()
         {
-            ViewBag.Message = "Your app description page.";
+            ViewBag.Message = "Enter your date range and click the \"View Sales\" button.";
 
             return View();
         }
